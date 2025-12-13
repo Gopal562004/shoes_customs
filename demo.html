@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sneaker Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .sneaker { width: 200px; text-align: center; }
+        .placeholder { 
+            width: 200px; 
+            height: 100px; 
+            background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%);
+            background-size: 20px 20px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sneaker Image Structure Test</h1>
+    <div class="container">
+        <div class="sneaker">
+            <h3>Air Max 90</h3>
+            <div class="placeholder">base.png</div>
+            <div class="placeholder">upper.png (mask)</div>
+            <div class="placeholder">sole.png (mask)</div>
+        </div>
+        <div class="sneaker">
+            <h3>Jordan 1</h3>
+            <div class="placeholder">base.png</div>
+            <div class="placeholder">upper.png (mask)</div>
+            <div class="placeholder">swoosh.png (mask)</div>
+        </div>
+    </div>
+    <p>For the assignment, either:</p>
+    <ol>
+        <li>Download actual images from PNGWing.com</li>
+        <li>Use the CSS fallback (already implemented)</li>
+        <li>Generate simple SVG images programmatically</li>
+    </ol>
+</body>
+</html>
