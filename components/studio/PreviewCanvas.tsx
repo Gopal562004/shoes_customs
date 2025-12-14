@@ -45,22 +45,51 @@ export function PreviewCanvas() {
   };
 
   // Map part names to your specific image files
-  const getImagePath = (part: string = "base"): string => {
-    if (!selectedProduct) return "";
-    const imageMap: Record<string, string> = {
-      base: "mke_base.png",
-      upper: "mke_upper.png",
-      sole: "mke_sole.png",
-      midsole: "mke_mid_sole.png",
-      laces: "mke_lace.png",
-      swoosh: "mke_exestave.png",
-    };
-    const fileName = imageMap[part] || `${part}.png`;
-    const folder = selectedProduct.name.toLowerCase().includes("air max")
-      ? "nike-airmax"
-      : "jordan-1";
-    return `/sneakers/${folder}/${fileName}`;
+const getImagePath = (part: string = "base"): string => {
+  if (!selectedProduct) return "";
+
+  const isNike = selectedProduct.name.toLowerCase().includes("air max");
+  const isJordan = selectedProduct.name.toLowerCase().includes("jordan");
+
+  // Nike image mapping
+  const nikeImageMap: Record<string, string> = {
+    base: "mke_base.png",
+    upper: "mke_upper.png",
+    sole: "mke_sole.png",
+    midsole: "mke_mid_sole.png",
+    laces: "mke_lace.png",
+    swoosh: "mke_exestave.png",
+    heel: "heel.png",
+    toe: "toe.png",
+    text: "mke_text.png",
   };
+
+  // Jordan image mapping
+  const jordanImageMap: Record<string, string> = {
+    base: "j_base.png",
+    upper: "j_upper.png",
+    sole: "j_sole.png",
+    middle: "j_middle.png",
+    lace: "j_lace.png",
+    top: "j_top.png",
+    text: "j_text.png",
+  };
+
+  let fileName = "";
+  let folder = "";
+
+  if (isNike) {
+    folder = "nike-airmax";
+    fileName = nikeImageMap[part] || `${part}.png`;
+  } else if (isJordan) {
+    folder = "jordan";
+    fileName = jordanImageMap[part] || `${part}.png`;
+  } else {
+    return ""; // Unknown product
+  }
+
+  return `/sneakers/${folder}/${fileName}`;
+};
 
   // Test if image exists
   const testImageLoad = (url: string): Promise<boolean> => {

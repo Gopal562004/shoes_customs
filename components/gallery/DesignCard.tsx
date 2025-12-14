@@ -1,3 +1,4 @@
+// components/gallery/DesignCard.tsx
 "use client";
 
 import { SavedDesign } from "@/types";
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/card";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
+import { mockProducts } from "@/lib/mock-data";
 
 interface DesignCardProps {
   design: SavedDesign;
@@ -46,6 +48,12 @@ export function DesignCard({
 }: DesignCardProps) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+
+  // Find product info for this design
+  const product =
+    mockProducts.find((p) => p.id === design.productId) || mockProducts[0];
+  const isNike = product.name.toLowerCase().includes("air max");
+  const isJordan = product.name.toLowerCase().includes("jordan");
 
   // Safely format date
   const formatDate = (dateString?: string) => {
@@ -79,21 +87,46 @@ export function DesignCard({
     return { colorCount, materialCount, hasText };
   }, [designCustomizations]);
 
-  // Generate image path function
+  // Generate image path function - WORKS FOR BOTH NIKE AND JORDAN
   const getImagePath = (part: string = "base"): string => {
-    const imageMap: Record<string, string> = {
-      base: "mke_base.png",
-      upper: "mke_upper.png",
-      sole: "mke_sole.png",
-      midsole: "mke_mid_sole.png",
-      laces: "mke_lace.png",
-      swoosh: "mke_exestave.png",
-      heel: "heel.png",
-      toe: "toe.png",
+    // Map UI part names to file names
+    const partMapping: Record<string, string> = {
+      // Common parts
+      base: "base",
+      upper: "upper",
+      sole: "sole",
+      text: "text",
+
+      // Nike specific
+      midsole: "mid_sole", // UI "midsole" -> file "mid_sole"
+      laces: "lace", // UI "laces" -> file "lace"
+      swoosh: "exestave", // UI "swoosh" -> file "exestave"
+      heel: "heel",
+      toe: "toe",
+
+      // Jordan specific
+      middle: "middle", // UI "middle" -> file "middle"
+      lace: "lace", // UI "lace" -> file "lace"
+      top: "top", // Jordan specific
     };
 
-    const fileName = imageMap[part] || `${part}.png`;
-    const folder = "nike-airmax";
+    let folder = "";
+    let prefix = "";
+
+    if (isNike) {
+      folder = "nike-airmax";
+      prefix = "mke_";
+    } else if (isJordan) {
+      folder = "jordan";
+      prefix = "j_";
+    } else {
+      folder = "nike-airmax";
+      prefix = "mke_";
+    }
+
+    // Map the part to correct file name
+    const filePart = partMapping[part] || part;
+    const fileName = `${prefix}${filePart}.png`;
 
     return `/sneakers/${folder}/${fileName}`;
   };
@@ -109,7 +142,7 @@ export function DesignCard({
     return colors.slice(0, 5);
   }, [designCustomizations]);
 
-  // Render sneaker preview WITHOUT using previewImage
+  // Render sneaker preview
   const renderSneakerPreview = (showControls = false) => {
     return (
       <div className="relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg p-4 h-full">
@@ -154,9 +187,10 @@ export function DesignCard({
             {/* Base Image */}
             <img
               src={getImagePath("base")}
-              alt="Sneaker base"
+              alt={`${product.name} base`}
               className="absolute inset-0 w-full h-full object-contain opacity-100"
               onError={(e) => {
+                console.error(`Failed to load image: ${getImagePath("base")}`);
                 e.currentTarget.style.display = "none";
               }}
             />
@@ -165,7 +199,19 @@ export function DesignCard({
             {Object.entries(designCustomizations).map(([part, data]) => {
               if (!data?.color) return null;
 
-              const maskUrl = getImagePath(part);
+              // Map Jordan-specific part names to correct file names
+              let imagePart = part;
+              if (isJordan) {
+                // Jordan parts that differ from Nike
+                const jordanMapping: Record<string, string> = {
+                  middle: "middle",
+                  lace: "lace",
+                  top: "top",
+                };
+                imagePart = jordanMapping[part] || part;
+              }
+
+              const maskUrl = getImagePath(imagePart);
               return (
                 <div
                   key={part}
@@ -189,9 +235,12 @@ export function DesignCard({
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
                 style={{
                   color: designCustomizations.text.textColor || "#000000",
-                  fontSize: "24px",
+                  fontSize: isJordan ? "18px" : "22px",
                   fontWeight: "bold",
                   textShadow: "2px 2px 4px rgba(255,255,255,0.8)",
+                  fontFamily: isJordan
+                    ? "'Impact', sans-serif"
+                    : "'Arial', sans-serif",
                 }}
               >
                 {designCustomizations.text.text}
@@ -236,6 +285,19 @@ export function DesignCard({
                       <span>Text</span>
                     </div>
                   )}
+                </div>
+
+                {/* Product Badge */}
+                <div className="mt-2">
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      isNike
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-black text-white"
+                    }`}
+                  >
+                    {product.name}
+                  </span>
                 </div>
               </div>
 
@@ -413,7 +475,7 @@ export function DesignCard({
             backgroundColor:
               designCustomizations.upper?.color ||
               designCustomizations.sole?.color ||
-              "#6B7280",
+              (isNike ? "#0066cc" : "#000000"),
           }}
         />
 
@@ -422,9 +484,20 @@ export function DesignCard({
           <div className="h-48 w-full relative">
             {renderSneakerPreview()}
 
+            {/* Product Badge */}
+            <div className="absolute top-2 left-2">
+              <span
+                className={`px-2 py-1 ${
+                  isNike ? "bg-blue-600" : "bg-black"
+                } text-white text-xs rounded-full font-medium backdrop-blur-sm`}
+              >
+                {isNike ? "Nike" : "Jordan"}
+              </span>
+            </div>
+
             {/* Tags Overlay */}
             {designTags.length > 0 && (
-              <div className="absolute top-2 left-2 flex gap-1 flex-wrap max-w-[70%]">
+              <div className="absolute top-2 right-2 flex gap-1 flex-wrap max-w-[70%]">
                 {designTags.slice(0, 2).map((tag) => (
                   <span
                     key={tag}
@@ -443,7 +516,7 @@ export function DesignCard({
             )}
 
             {/* Customization count badge */}
-            <div className="absolute top-2 right-2">
+            <div className="absolute bottom-2 right-2">
               <span className="px-2 py-1 bg-white/90 text-gray-800 text-xs rounded-full font-medium shadow-sm">
                 {Object.keys(designCustomizations).length} parts
               </span>

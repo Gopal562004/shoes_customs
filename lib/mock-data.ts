@@ -25,10 +25,19 @@ export const mockProducts = [
   {
     id: "prod-2",
     name: "Jordan 1",
-    baseImage: "/sneakers/jordan-1/base.png",
-    customizableParts: ["upper", "sole", "swoosh", "heel", "toe"],
+    baseImage: "../public/sneakers/jordan/j_base.png",
+    customizableParts: ["upper", "sole", "middle", "lace", "top"],
     options: {
-      colors: ["#000000", "#FFFFFF", "#FF0000", "#0000FF", "#FFD700"],
+      colors: [
+        "#FF3B30",
+        "#007AFF",
+        "#34C759",
+        "#FF9500",
+        "#5AC8FA",
+        "#AF52DE",
+        "#5856D6",
+        "#FF2D55",
+      ],
       materials: ["leather", "patent-leather", "suede"],
       textures: ["smooth", "tumbled"],
     },
