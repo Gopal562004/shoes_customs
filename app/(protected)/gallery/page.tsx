@@ -48,16 +48,29 @@ export default function GalleryPage() {
     const storeDesigns = savedDesigns || [];
     // If no designs in store yet, use mock designs
     if (storeDesigns.length === 0) {
-      return mockDesigns;
+      return mockDesigns.map((design) => ({
+        ...design,
+        // Ensure mock designs have all required fields
+        customizations: design.customizations || {},
+        tags: design.tags || [],
+        created_at: design.created_at || new Date().toISOString(), // Critical fix
+        description: design.description || "",
+      }));
     }
-    return storeDesigns;
+    return storeDesigns.map((design) => ({
+      ...design,
+      // Ensure store designs have all required fields too
+      customizations: design.customizations || {},
+      tags: design.tags || [],
+      created_at: design.created_at || new Date().toISOString(),
+    }));
   }, [savedDesigns]);
 
   // All unique tags from user designs
   const allTags = useMemo(() => {
     const tags = new Set<string>();
     userDesigns.forEach((design) => {
-      design.tags.forEach((tag) => tags.add(tag));
+      (design.tags || []).forEach((tag) => tags.add(tag));
     });
     return Array.from(tags);
   }, [userDesigns]);
@@ -67,15 +80,16 @@ export default function GalleryPage() {
     return userDesigns.filter((design) => {
       const matchesSearch =
         design.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        design.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        false ||
-        design.tags.some((tag) =>
+        (design.description?.toLowerCase() || "").includes(
+          searchQuery.toLowerCase()
+        ) ||
+        (design.tags || []).some((tag) =>
           tag.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
       const matchesTags =
         selectedTags.length === 0 ||
-        selectedTags.every((tag) => design.tags.includes(tag));
+        selectedTags.every((tag) => (design.tags || []).includes(tag));
 
       return matchesSearch && matchesTags;
     });
@@ -89,12 +103,14 @@ export default function GalleryPage() {
       case "newest":
         return designs.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            new Date(b.created_at || new Date()).getTime() -
+            new Date(a.created_at || new Date()).getTime()
         );
       case "oldest":
         return designs.sort(
           (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            new Date(a.created_at || new Date()).getTime() -
+            new Date(b.created_at || new Date()).getTime()
         );
       case "name":
         return designs.sort((a, b) => a.name.localeCompare(b.name));
@@ -107,13 +123,15 @@ export default function GalleryPage() {
   const stats = useMemo(() => {
     const totalDesigns = userDesigns.length;
     const thisMonth = userDesigns.filter(
-      (d) => new Date(d.created_at).getMonth() === new Date().getMonth()
+      (d) =>
+        new Date(d.created_at || new Date()).getMonth() ===
+        new Date().getMonth()
     ).length;
     const totalColors = new Set(
       userDesigns.flatMap((d) =>
-        Object.values(d.customizations)
-          .filter((c) => c.color)
-          .map((c) => c.color)
+        Object.values(d.customizations || {})
+          .filter((c: any) => c?.color)
+          .map((c: any) => c.color)
       )
     ).size;
     const totalTags = allTags.length;
@@ -145,19 +163,13 @@ export default function GalleryPage() {
   const handleDuplicateDesign = async (design: SavedDesign) => {
     setIsLoading(true);
     try {
-      // Create a duplicate with new ID and timestamp
-      const duplicatedDesign: SavedDesign = {
-        ...design,
-        id: `design-${Date.now()}`,
-        name: `${design.name} (Copy)`,
-        created_at: new Date().toISOString(),
-        previewImage: null,
-      };
+      // First load the design into the current customization state
+      loadDesign(design);
 
-      // Save to store
+      // Then save it as a new design
       useCustomizationStore
         .getState()
-        .saveCurrentDesign(duplicatedDesign.name, duplicatedDesign.tags);
+        .saveCurrentDesign(`${design.name} (Copy)`, design.tags || []);
 
       alert(`Design "${design.name}" duplicated successfully!`);
     } catch (error) {

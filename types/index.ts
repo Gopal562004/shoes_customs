@@ -12,6 +12,7 @@ export interface Product {
   description?: string;
 }
 
+// @/types/index.ts
 export interface PartCustomization {
   color?: string;
   material?: string;
@@ -25,7 +26,20 @@ export interface SavedDesign {
   userId: string;
   productId: string;
   name: string;
-  customizations: Record<string, PartCustomization>;
+  
+  // EITHER use a specific structure (if you know all parts)
+  customizations: {
+    upper?: PartCustomization;
+    sole?: PartCustomization;
+    laces?: PartCustomization;
+    swoosh?: PartCustomization;
+    text?: PartCustomization;
+    [key: string]: PartCustomization | undefined; // Allow other parts
+  };
+  
+  // OR use the generic Record type (if parts can vary)
+  // customizations: Record<string, PartCustomization>;
+  
   previewImage?: string;
   tags: string[];
   created_at: string;

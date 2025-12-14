@@ -38,11 +38,12 @@ export const mockProducts = [
 ];
 
 // lib/mock-data.ts
+// lib/mock-data.ts - CORRECTED VERSION
 export const mockDesigns = [
   {
     id: "design-1",
     userId: "user-1",
-    productId: "prod-1",
+    productId: "prod-1",  // This should match product.id from mockProducts
     name: "Summer Vibes",
     customizations: {
       upper: { color: "#FF9500", material: "canvas" },
@@ -50,14 +51,15 @@ export const mockDesigns = [
       laces: { color: "#34C759" },
       text: { text: "AIR", textColor: "#000000" },
     },
-    previewImage: "/designs/summer-vibes.png", // Add this
+    previewImage: "/designs/summer-vibes.png",
     tags: ["summer", "orange", "casual"],
-    created_at: "2024-01-15T10:00:00Z",
+    created_at: "2024-01-15T10:00:00Z", // REQUIRED - was missing
+    description: "Bright summer design with orange accents" // Optional
   },
   {
     id: "design-2",
     userId: "user-1",
-    productId: "prod-1",
+    productId: "prod-1",  // This should match product.id from mockProducts
     name: "Midnight Blue",
     customizations: {
       upper: { color: "#1e3a8a", material: "leather" },
@@ -65,9 +67,10 @@ export const mockDesigns = [
       swoosh: { color: "#fbbf24" },
       text: { text: "MAX", textColor: "#ffffff" },
     },
-    previewImage: "/designs/midnight-blue.png", // Add this
+    previewImage: "/designs/midnight-blue.png",
     tags: ["blue", "premium", "night"],
-    created_at: "2024-01-20T14:30:00Z",
+    created_at: "2024-01-20T14:30:00Z", // REQUIRED - was missing
+    description: "Premium midnight blue design" // Optional
   },
 ];
 
